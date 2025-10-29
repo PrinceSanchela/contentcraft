@@ -4,18 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Mail, 
-  FileText, 
-  Newspaper, 
-  Briefcase, 
-  PenTool, 
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Mail,
+  FileText,
+  Newspaper,
+  Briefcase,
+  PenTool,
   Megaphone,
   Sparkles,
   LogOut,
   Coins,
   Moon,
   Sun,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -81,7 +83,7 @@ const Dashboard = () => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const initialTheme = savedTheme || systemTheme;
-    
+
     setTheme(initialTheme);
     document.documentElement.classList.toggle("dark", initialTheme === "dark");
   }, []);
@@ -100,7 +102,7 @@ const Dashboard = () => {
   const checkUser = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         navigate("/auth");
         return;
@@ -144,18 +146,19 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen gradient-subtle">
+    <div className="min-h-screen gradient-subtle overflow-x-hidden">
       {/* Header */}
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <div className="container flex h-16 items-center justify-between px-4 max-w-full">
+          <div className="flex items-center gap-2 min-w-0 flex-shrink">
+            <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary flex-shrink-0" />
+            <span className="text-base md:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
               ContentCraft AI
             </span>
           </div>
-          
-          <div className="flex items-center gap-4">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/20">
               <Coins className="h-5 w-5 text-primary" />
               <span className="font-semibold">{profile?.credits || 0} Credits</span>
@@ -177,6 +180,67 @@ const Dashboard = () => {
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
+              <Coins className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="text-sm font-semibold whitespace-nowrap">{profile?.credits || 0}</span>
+            </div>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <div className="flex flex-col gap-4 mt-8">
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <Coins className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">{profile?.credits || 0} Credits</span>
+                    <Badge variant="secondary" className="ml-2">
+                      {profile?.plan || "Free"}
+                    </Badge>
+                  </div>
+
+                  <Button variant="outline" asChild className="w-full justify-start">
+                    <Link to="/pricing">
+                      <Coins className="mr-2 h-4 w-4" />
+                      Get Credits
+                    </Link>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={toggleTheme}
+                  >
+                    {theme === "light" ? (
+                      <>
+                        <Moon className="mr-2 h-4 w-4" />
+                        Dark Mode
+                      </>
+                    ) : (
+                      <>
+                        <Sun className="mr-2 h-4 w-4" />
+                        Light Mode
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
